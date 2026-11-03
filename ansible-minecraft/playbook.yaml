@@ -38,7 +38,7 @@
         restart_policy: unless-stopped
 
         published_ports:
-          - "{{ minecraft_port }}:25565"
+          - "25565:25565"
 
         volumes:
           - "{{ minecraft_data_dir }}:/data"
