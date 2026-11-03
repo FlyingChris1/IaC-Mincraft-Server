@@ -36,9 +36,10 @@
         image: itzg/minecraft-server:latest
         state: started
         restart_policy: unless-stopped
-
+        
         published_ports:
-          - "25565:25565"
+          - "127.0.0.1:25565:25565"
+        publish_all_ports: false
 
         volumes:
           - "{{ minecraft_data_dir }}:/data"
