@@ -1,0 +1,52 @@
+
+---
+- name: Minecraft Server Setup
+  hosts: minecraft
+  become: true
+
+  vars:
+    minecraft_data_dir: /opt/minecraft/data
+    minecraft_memory: "2G"
+    minecraft_port: 25565
+
+  tasks:
+    - name: Docker installieren
+      ansible.builtin.apt:
+        name: docker.io
+        state: present
+        update_cache: true
+
+    - name: Docker starten
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Minecraft Verzeichnis erstellen
+      ansible.builtin.file:
+        path: "{{ minecraft_data_dir }}"
+        state: directory
+        owner: "1000"
+        group: "1000"
+        mode: "0755"
+
+    - name: Minecraft Docker Container starten
+      community.docker.docker_container:
+        name: minecraft
+        image: itzg/minecraft-server:latest
+        state: started
+        restart_policy: unless-stopped
+
+        published_ports:
+          - "{{ minecraft_port }}:25565"
+
+        volumes:
+          - "{{ minecraft_data_dir }}:/data"
+
+        env:
+          EULA: "TRUE"
+          TYPE: "VANILLA"
+          VERSION: "LATEST"
+          MEMORY: "{{ minecraft_memory }}"
+          ONLINE_MODE: "TRUE"
+          ENABLE_RCON: "false"
