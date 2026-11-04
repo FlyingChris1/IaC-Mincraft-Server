@@ -30,24 +30,53 @@
         group: "1000"
         mode: "0755"
 
+
     - name: Minecraft Docker Container starten
       community.docker.docker_container:
         name: minecraft
         image: itzg/minecraft-server:latest
         state: started
         restart_policy: unless-stopped
-        
+
+        # Container Security
+        privileged: false
+        security_opts:
+          - "no-new-privileges:true"
+        cap_drop:
+          - NET_RAW
+
+        # Resource Limits
+        memory: "3G"
+        cpus: 1.5
+        pids_limit: 512
+
+        # Process Management
+        init: true
+        stop_timeout: 120
+
+        # Network Security
         published_ports:
           - "127.0.0.1:25565:25565"
         publish_all_ports: false
 
+        # Persistent Storage
         volumes:
           - "{{ minecraft_data_dir }}:/data"
 
+        # Log Rotation
+        log_driver: json-file
+        log_options:
+          max-size: "10m"
+          max-file: "3"
+
+        # Minecraft Configuration
         env:
           EULA: "TRUE"
           TYPE: "VANILLA"
           VERSION: "LATEST"
           MEMORY: "{{ minecraft_memory }}"
+          UID: "1000"
+          GID: "1000"
           ONLINE_MODE: "TRUE"
           ENABLE_RCON: "false"
+
