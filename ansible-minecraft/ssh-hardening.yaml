@@ -1,0 +1,35 @@
+
+---
+- name: Harden SSH Configuration
+  hosts: minecraft
+  become: true
+
+  tasks:
+    - name: Configure secure SSH settings
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/00-minecraft-hardening.conf
+        owner: root
+        group: root
+        mode: "0644"
+        backup: true
+        content: |
+          PermitRootLogin no
+          PasswordAuthentication no
+          KbdInteractiveAuthentication no
+          PermitEmptyPasswords no
+          PubkeyAuthentication yes
+          X11Forwarding no
+          AllowAgentForwarding no
+          AllowTcpForwarding local
+        validate: "/usr/sbin/sshd -t -f %s"
+      notify: Reload SSH
+
+    - name: Validate complete SSH configuration
+      ansible.builtin.command: /usr/sbin/sshd -t
+      changed_when: false
+
+  handlers:
+    - name: Reload SSH
+      ansible.builtin.service:
+        name: ssh
+        state: reloaded
