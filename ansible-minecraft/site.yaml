@@ -5,4 +5,6 @@
 
 - import_playbook: firewall.yaml
 
+- import_playbook: fail2ban.yaml
+
 - import_playbook: playbook.yaml
