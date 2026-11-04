@@ -1,0 +1,12 @@
+---
+- import_playbook: ssh-hardening.yaml
+
+- import_playbook: ssh-crypto-hardening.yaml
+
+- import_playbook: security-updates.yaml
+
+- import_playbook: firewall.yaml
+
+- import_playbook: fail2ban.yaml
+
+- import_playbook: playbook.yaml

@@ -38,7 +38,22 @@
     - name: Configure sudo for automation
       ansible.builtin.copy:
         dest: /etc/sudoers.d/90-deploy
-        content: "deploy ALL=(ALL) NOPASSWD: ALL\n"
+        content: "deploy ALL=(ALL) ALL\n"
+        owner: root
+        group: root
+        mode: "0440"
+        validate: "/usr/sbin/visudo -cf %s"
+
+    - name: Ensure deploy user has sudo privileges
+      ansible.builtin.user:
+        name: deploy
+        groups: sudo
+        append: true
+
+    - name: Allow passwordless sudo for deploy
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/99-minecraft-deploy
+        content: "deploy ALL=(ALL:ALL) ALL\n"
         owner: root
         group: root
         mode: "0440"

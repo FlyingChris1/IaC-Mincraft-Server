@@ -1,4 +1,3 @@
-
 ---
 - name: UFW Firewall konfigurieren
   hosts: minecraft
@@ -10,11 +9,18 @@
         name: ufw
         state: present
 
-    - name: SSH erlauben
+    - name: SSH auf Port 2222 erlauben
+      community.general.ufw:
+        rule: allow
+        port: "2222"
+        proto: tcp
+
+    - name: Alte SSH-Freigabe entfernen
       community.general.ufw:
         rule: allow
         port: "22"
         proto: tcp
+        delete: true
 
     - name: Eingehende Verbindungen blockieren
       community.general.ufw:
@@ -29,3 +35,7 @@
     - name: UFW aktivieren
       community.general.ufw:
         state: enabled
+
+    - name: SSH-Verbindung prüfen
+      ansible.builtin.wait_for_connection:
+        timeout: 30

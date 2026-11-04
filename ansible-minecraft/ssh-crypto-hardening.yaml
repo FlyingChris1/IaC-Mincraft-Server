@@ -1,0 +1,37 @@
+
+---
+- name: SSH-Kryptografie absichern
+  hosts: minecraft
+  become: true
+
+  tasks:
+    - name: Sichere SSH-Algorithmen konfigurieren
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/02-minecraft-crypto.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256
+          HostKeyAlgorithms ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+          MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
+        validate: "/usr/sbin/sshd -t -f %s"
+      register: ssh_crypto
+
+    - name: Gesamte SSH-Konfiguration validieren
+      ansible.builtin.command:
+        cmd: /usr/sbin/sshd -t
+      changed_when: false
+
+    - name: SSH bei Änderungen neu laden
+      ansible.builtin.systemd:
+        name: ssh.service
+        state: reloaded
+      when: ssh_crypto.changed
+
+    - name: SSH-Verbindung zurücksetzen
+      ansible.builtin.meta: reset_connection
+
+    - name: SSH-Verbindung überprüfen
+      ansible.builtin.wait_for_connection:
+        timeout: 30
